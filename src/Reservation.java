@@ -9,11 +9,16 @@ public class Reservation {
         reserve(threadName, newStatus);
     }
 
+    /*
+        * Metodas, kuris simbolizuoja rezervacijos veiksmą.
+        * critical section - status kintamasis
+     */
     private void reserve(String threadName, String newStatus) {
         System.out.println(threadName + ": Attempting to change status to " + newStatus);
 
         try {
-            Thread.sleep(100);
+            // Atsitiktinis gijų užlaikymas, siekiant padidinti programos nedeterminizmą.
+            Thread.sleep((long) (Math.random() * 200));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
