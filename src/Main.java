@@ -1,21 +1,34 @@
-import java.util.stream.IntStream;
 
 public class Main {
-    public static void main(String[] args) {
-        Reservation reservation = new Reservation();
 
-        System.out.println("Synced threads");
-        IntStream.range(0, 2).forEach(i -> new ReserveThread(reservation, "Reserved", true).start());
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println("Starting synchronized threads...");
+        processThreads(true);
+        System.out.println("Synchronized threads complete.\n\n");
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        System.out.println("Starting unsynchronized threads...");
+        processThreads(false);
+        System.out.println("Unsynchronized threads complete.");
+    }
+
+    private static void processThreads(boolean syncFlag) throws InterruptedException {
+        Hotel hotel = new Hotel(20000, 0);
+        ReservationThread[] threads = new ReservationThread[20];
+
+        for (int i = 0; i < 20; i++) {
+            threads[i] = new ReservationThread(hotel, syncFlag, 1000);
+            threads[i].setName(syncFlag ? "SyncThread-" + i : "UnsyncThread-" + i);
         }
 
-        reservation.setStatus("Available");
+        for (Thread thread : threads) {
+            thread.start();
+        }
 
-        System.out.println("\n\nUnsynced threads");
-        IntStream.range(0, 2).forEach(i -> new ReserveThread(reservation, "Reserved", false).start());
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        System.out.println("Expected hotel balance: " + 20000000 + " got: " + hotel.getBalance());
+        System.out.println("Expected hotel room count: " + 0 + " got: " + hotel.getRoomCount());
     }
 }
